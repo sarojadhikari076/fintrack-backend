@@ -2,18 +2,18 @@ const asyncWrapper = require('../utils/asyncWrapper')
 const FinancePlan = require('../models/finance.model')
 
 const upsertFinancePlan = asyncWrapper(async (req, res) => {
-  const { income, expenseBudget, savings, investments } = req.body
+  const { income, savings, investments } = req.body
 
   const financePlanFields = {
     user: req.userId,
     income,
-    expenseBudget,
+    expenseBudget: income - savings - investments,
     savings,
     investments
   }
 
   // Validate that expense budget, investments, and savings do not exceed income
-  if (expenseBudget + savings + investments > income) {
+  if (savings + investments > income) {
     return next({
       message: 'Expense budget, investments, and savings cannot exceed income',
       statusCode: 400

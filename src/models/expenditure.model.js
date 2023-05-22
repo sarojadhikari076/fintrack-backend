@@ -21,7 +21,8 @@ const expenditureSchema = new mongoose.Schema(
       required: [true, 'Category is required.']
     },
     remarks: {
-      type: String
+      type: String,
+      default: '--'
     }
   },
   { timestamps: true }
