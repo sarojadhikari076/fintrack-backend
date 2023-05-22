@@ -1,6 +1,17 @@
 const router = require('express').Router()
-const { getExpenditurePlan } = require('../controllers/expenditure.controllers')
+const {
+  getExpenditure,
+  getExpenditures,
+  createExpenditure,
+  deleteExpenditure,
+  updateExpenditure
+} = require('../controllers/expenditure.controllers')
 
-router.get('/', getExpenditurePlan)
+router.route('/').get(getExpenditures).post(createExpenditure)
+router
+  .route('/expenditureId')
+  .get(getExpenditure)
+  .patch(updateExpenditure)
+  .delete(deleteExpenditure)
 
 module.exports = router

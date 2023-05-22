@@ -46,7 +46,9 @@ const login = asyncWrapper(async (req, res, next) => {
   }
 
   // Generate a JWT token
-  const token = jwt.sign({ userId: user._id }, config.secretKey)
+  const token = jwt.sign({ userId: user._id }, config.secretKey, {
+    expiresIn: config.jwtTtl
+  })
 
   res
     .status(200)
