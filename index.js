@@ -2,6 +2,10 @@ const express = require('express')
 const { config } = require('./src/config/app')
 const { db } = require('./src/config/db')
 const appRouter = require('./src/routes/main.route')
+const {
+  notFoundHandlers,
+  globalErrorHandlers
+} = require('./src/utils/errorHandlers')
 
 const app = express()
 app.use(express.json())
@@ -15,6 +19,8 @@ db.once('open', () => {
 })
 
 app.use('/api/v1', appRouter)
+app.use(notFoundHandlers)
+app.use(globalErrorHandlers)
 
 app.listen(config.port, () => {
   console.log(`Server Started at ${config.port}`)
