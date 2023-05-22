@@ -1,22 +1,22 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const { config } = require('./src/config/app')
+const User = require('./src/models/user.model')
+const FinancePlan = require('./src/models/finance.model')
+const Expenditure = require('./src/models/expenditure.model')
 
 async function seed() {
-  const session = await mongoose.startSession()
-  session.startTransaction()
-
   try {
-    // Connect to MongoDB
     await mongoose.connect(config.dbUrl, {
-      session
+      useNewUrlParser: true,
+      useUnifiedTopology: true
     })
 
     // Clear existing data
     await Promise.all([
-      User.deleteMany({}, { session }),
-      FinancePlan.deleteMany({}, { session }),
-      Expenditure.deleteMany({}, { session })
+      User.deleteMany({}),
+      FinancePlan.deleteMany({}),
+      Expenditure.deleteMany({})
     ])
 
     // Create a sample user
@@ -25,7 +25,7 @@ async function seed() {
       email: 'johndoe@example.com',
       password: await bcrypt.hash('password', 10)
     })
-    await user.save({ session })
+    await user.save()
 
     // Create a finance plan for the user
     const financePlan = new FinancePlan({
@@ -35,7 +35,7 @@ async function seed() {
       savings: 1000,
       investments: 1000
     })
-    await financePlan.save({ session })
+    await financePlan.save()
 
     // Create sample expenditures
     const expenditures = [
@@ -62,23 +62,16 @@ async function seed() {
       }
     ]
 
-    await Expenditure.insertMany(expenditures, { session })
+    await Expenditure.insertMany(expenditures)
 
-    // Commit the transaction
-    await session.commitTransaction()
     console.log('Seed data has been inserted successfully.')
+    process.exit(0)
   } catch (error) {
     console.error('Error seeding data:', error)
-
-    // Rollback the transaction
-    await session.abortTransaction()
+    process.exit(1)
   } finally {
-    // End the session
-    session.endSession()
+    await mongoose.disconnect()
   }
-
-  // Disconnect from MongoDB
-  await mongoose.disconnect()
 }
 
 seed()
