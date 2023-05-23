@@ -8,6 +8,7 @@ module.exports = {
     dbUrl: process.env.DB_URL ?? 'mongodb://localhost:27017/finance-tracker',
     isDev: process.env.ENVIRONMENT === 'DEVELOPMENT',
     secretKey: process.env.JWT_SECRET ?? 'verysecrettoken',
-    jwtTtl: process.env.JWT_TTL ?? '5d'
+    jwtTtl: process.env.JWT_TTL ?? '5d',
+    allowedOrigins: process.env.ALLOWED_ORIGINS ?? 'http://localhost:4000'
   }
 }

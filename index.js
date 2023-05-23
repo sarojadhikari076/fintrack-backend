@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const { config } = require('./src/config/app')
 const { db } = require('./src/config/db')
 const appRouter = require('./src/routes/main.route')
@@ -9,6 +10,12 @@ const {
 
 const app = express()
 app.use(express.json())
+app.use(
+  cors({
+    origin: config.allowedOrigins,
+    methods: ['OPTIONS', 'GET', 'POST', 'PUT', 'DELETE']
+  })
+)
 
 db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 db.on('close', () => {
