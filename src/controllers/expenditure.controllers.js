@@ -1,6 +1,7 @@
 const asyncWrapper = require('../utils/asyncWrapper')
 const Expenditure = require('../models/expenditure.model')
 const FinancePlan = require('../models/finance.model')
+const { getDateFilter } = require('../utils/date')
 
 const createExpenditure = asyncWrapper(async (req, res, next) => {
   const { name, price, category, remarks } = req.body
@@ -48,17 +49,57 @@ const createExpenditure = asyncWrapper(async (req, res, next) => {
 })
 
 const getExpenditures = asyncWrapper(async (req, res) => {
-  const { userId } = req
+  const { q, category, date, sort, page, pageSize } = req.query
 
-  // TODO: Need to implement pagination, dynamic sorting and filtering
-  const expenditures = await Expenditure.find({ user: userId }).sort({
-    createdAt: -1
-  })
+  // Build the filter object based on query parameters
+  const filter = { user: req.userId }
+  const sortOption = {}
+  if (q) {
+    const regex = new RegExp(q.trim(), 'i')
+    filter.$or = [
+      { name: { $regex: regex } },
+      { category: { $regex: regex } },
+      { remarks: { $regex: regex } }
+    ]
+  }
+
+  if (category) {
+    filter.category = category
+  }
+
+  if (date) {
+    filter.createdAt = getDateFilter(date)
+  }
+
+  if (sort) {
+    const [key, value] = sort.split(':')
+    sortOption[key] = value
+  }
+
+  // Calculate skip and limit values for pagination
+  const pageNumber = parseInt(page, 10) || 1
+  const limit = parseInt(pageSize, 10) || 10
+  const skip = (pageNumber - 1) * limit
+
+  // Perform the database query with pagination and sorting
+  const query = Expenditure.find(filter)
+    .sort(sortOption)
+    .skip(skip)
+    .limit(limit)
+
+  // Execute the query and count total documents for pagination metadata
+  const [expenditures, total] = await Promise.all([
+    query.exec(),
+    Expenditure.countDocuments(filter)
+  ])
 
   res.status(200).json({
     ok: true,
     message: 'Expenditures retrieved successfully',
-    expenditures
+    expenditures,
+    total,
+    page: pageNumber,
+    pageSize: limit
   })
 })
 
@@ -82,7 +123,7 @@ const deleteExpenditure = asyncWrapper(async (req, res, next) => {
   const { expenditureId } = req.params
 
   // Find the expenditure by ID
-  const expenditure = await Expenditure.findOne({
+  const expenditure = await Expenditure.findOneAndDelete({
     _id: expenditureId,
     user: req.userId
   })
@@ -97,8 +138,6 @@ const deleteExpenditure = asyncWrapper(async (req, res, next) => {
     { $inc: { expenseBudget: expenditure.price } },
     { new: true }
   )
-
-  await expenditure.remove()
 
   res.status(200).json({
     ok: true,

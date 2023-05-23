@@ -9,7 +9,7 @@ const {
 
 router.route('/').get(getExpenditures).post(createExpenditure)
 router
-  .route('/expenditureId')
+  .route('/:expenditureId')
   .get(getExpenditure)
   .patch(updateExpenditure)
   .delete(deleteExpenditure)
