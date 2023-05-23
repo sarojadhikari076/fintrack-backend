@@ -18,16 +18,21 @@ const register = asyncWrapper(async (req, res, next) => {
 
   // Create a new user
   const hashedPassword = await bcrypt.hash(password, 10)
-  const newUser = new User({
+  const user = new User({
     name,
     email,
     password: hashedPassword
   })
-  await newUser.save()
+  await user.save()
+
+  // Generate a JWT token
+  const token = jwt.sign({ userId: user._id }, config.secretKey, {
+    expiresIn: config.jwtTtl
+  })
 
   res
     .status(201)
-    .json({ ok: true, message: 'User registered successfully', newUser })
+    .json({ ok: true, message: 'User registered successfully', user, token })
 })
 
 const login = asyncWrapper(async (req, res, next) => {
