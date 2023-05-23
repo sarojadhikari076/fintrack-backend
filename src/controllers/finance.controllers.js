@@ -34,11 +34,12 @@ const upsertFinancePlan = asyncWrapper(async (req, res, next) => {
   })
 })
 
-const getFinancePlan = asyncWrapper(async (req, res, next) => {
-  const financePlan = await FinancePlan.findOne({ user: req.userId })
+const getFinancePlan = asyncWrapper(async (req, res) => {
+  let financePlan = await FinancePlan.findOne({ user: req.userId })
 
   if (!financePlan) {
-    return next({ message: 'Finance plan not found', statusCode: 404 })
+    financePlan = await FinancePlan.create({ user: req.userId }) // Create an empty FinancePlan
+    return
   }
 
   res.status(200).json({

@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken')
 const asyncWrapper = require('../utils/asyncWrapper')
 const User = require('../models/user.model')
 const { config } = require('../config/app')
-const FinancePlan = require('../models/finance.model')
 
 const register = asyncWrapper(async (req, res, next) => {
   const { name, email, password } = req.body
@@ -25,8 +24,6 @@ const register = asyncWrapper(async (req, res, next) => {
     password: hashedPassword
   })
   await newUser.save()
-
-  await FinancePlan.create() // Create an empty FinancePlan model
 
   res
     .status(201)

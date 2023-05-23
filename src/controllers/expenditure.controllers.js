@@ -1,7 +1,10 @@
 const asyncWrapper = require('../utils/asyncWrapper')
 const Expenditure = require('../models/expenditure.model')
 const FinancePlan = require('../models/finance.model')
+const User = require('../models/user.model')
 const { getDateFilter } = require('../utils/date')
+const { sendBudgetAlertEmail } = require('../services/email')
+const { config } = require('../config/app')
 
 const createExpenditure = asyncWrapper(async (req, res, next) => {
   const { name, price, category, remarks } = req.body
@@ -25,6 +28,12 @@ const createExpenditure = asyncWrapper(async (req, res, next) => {
       message: 'Expenditure exceeds expense budget',
       statusCode: 400
     })
+  }
+
+  // Send mail to the user if expenseBudget is getting low
+  if (remainingBudget < config.thresholdBudget) {
+    const user = await User.findById(req.userId)
+    sendBudgetAlertEmail(user, financePlan.expenseBudget)
   }
 
   const expenditure = new Expenditure({
