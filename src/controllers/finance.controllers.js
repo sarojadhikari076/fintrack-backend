@@ -1,7 +1,7 @@
 const asyncWrapper = require('../utils/asyncWrapper')
 const FinancePlan = require('../models/finance.model')
 
-const upsertFinancePlan = asyncWrapper(async (req, res) => {
+const upsertFinancePlan = asyncWrapper(async (req, res, next) => {
   const { income, savings, investments } = req.body
 
   const financePlanFields = {

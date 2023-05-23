@@ -13,7 +13,7 @@ app.use(express.json())
 app.use(
   cors({
     origin: config.allowedOrigins,
-    methods: ['OPTIONS', 'GET', 'POST', 'PUT', 'DELETE']
+    methods: ['OPTIONS', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE']
   })
 )
 

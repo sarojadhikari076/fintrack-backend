@@ -10,7 +10,10 @@ const createExpenditure = asyncWrapper(async (req, res, next) => {
   const financePlan = await FinancePlan.findOne({ user: userId })
 
   if (!financePlan) {
-    return next({ message: 'Finance plan not found', statusCode: 404 })
+    return next({
+      message: 'Finance plan not found. Please create it first.',
+      statusCode: 404
+    })
   }
 
   // Calculate the remaining expense budget after deducting the expenditure
@@ -47,7 +50,10 @@ const createExpenditure = asyncWrapper(async (req, res, next) => {
 const getExpenditures = asyncWrapper(async (req, res) => {
   const { userId } = req
 
-  const expenditures = await Expenditure.find({ user: userId })
+  // TODO: Need to implement pagination, dynamic sorting and filtering
+  const expenditures = await Expenditure.find({ user: userId }).sort({
+    createdAt: -1
+  })
 
   res.status(200).json({
     ok: true,
